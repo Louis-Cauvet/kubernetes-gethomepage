@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-custom-js
+data:
+  custom.js: |
+    console.log("Homepage custom JS loaded");

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-proxmox
+data:
+  proxmox.yaml: |
+    ---
+    # pve:
+    #   url: https://proxmox.host.or.ip:8006
+    #   token: username@pam!Token ID
+    #   secret: secret

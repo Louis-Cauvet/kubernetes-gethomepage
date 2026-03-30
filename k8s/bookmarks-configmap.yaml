@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-bookmarks
+data:
+  bookmarks.yaml: |
+    ---
+    # For configuration options and examples, please see:
+    # https://gethomepage.dev/configs/bookmarks
+
+    - Developer:
+        - Github:
+            - abbr: GH
+              href: https://github.com/
+
+    - Entertainment:
+        - YouTube:
+            - abbr: YT
+              href: https://youtube.com/

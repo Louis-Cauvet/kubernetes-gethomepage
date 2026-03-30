@@ -1,0 +1,43 @@
+[2026-03-30T10:07:17.703Z] info: kubernetes.yaml was copied to the config folder
+[2026-03-30T10:07:49.178Z] info: widgets.yaml was copied to the config folder
+[2026-03-30T10:07:49.217Z] info: docker.yaml was copied to the config folder
+[2026-03-30T10:07:49.228Z] info: services.yaml was copied to the config folder
+[2026-03-30T10:07:49.235Z] info: bookmarks.yaml was copied to the config folder
+[2026-03-30T10:07:49.246Z] info: proxmox.yaml was copied to the config folder
+[2026-03-30T10:07:49.297Z] info: custom.css was copied to the config folder
+[2026-03-30T10:07:49.304Z] info: custom.js was copied to the config folder
+[2026-03-30T10:19:30.290Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:19:30.290Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:19:30.299Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:19:30.299Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:19:30.712Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:19:30.713Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:19:55.869Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:19:55.870Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:19:55.880Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:19:55.880Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:19:56.238Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:19:56.239Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:20:13.646Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:20:13.646Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:20:13.654Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:20:13.654Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:20:13.982Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:20:13.982Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:26:06.255Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:26:06.255Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:26:06.265Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:26:06.265Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T10:26:06.629Z] error: Failed to load services.yaml, please check for errors
+[2026-03-30T10:26:06.629Z] error: TypeError: b[c].forEach is not a function
+[2026-03-30T12:03:45.481Z] error: <httpProxy> Error calling https://api.github.com/repos/gethomepage/homepage/releases...
+[2026-03-30T12:03:45.491Z] error: <httpProxy> [
+  500,
+  Error: queryAaaa ENOTFOUND api.github.com
+      at ignore-listed frames {
+    errno: undefined,
+    code: 'ENOTFOUND',
+    syscall: 'queryAaaa',
+    hostname: 'api.github.com'
+  }
+]

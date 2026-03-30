@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-widgets
+data:
+  widgets.yaml: |
+    ---
+    # For configuration options and examples, please see:
+    # https://gethomepage.dev/configs/info-widgets/
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - resources:
+        cpu: true
+        memory: true
+        disk: /
+
+    - search:
+        provider: duckduckgo
+        target: _blank
