@@ -7,6 +7,17 @@
     memory: true
     disk: /
 
+- kubernetes:
+    cluster:
+      show: true
+      cpu: true
+      memory: true
+
+- kubernetes:
+    resources:
+      - pods
+      - deployments
+
 - search:
     provider: duckduckgo
     target: _blank

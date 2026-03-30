@@ -4,13 +4,8 @@
 
 title: Dashboard Louis Cauvet
 theme: dark
+color: slate
 
 providers:
   openweathermap: openweathermapapikey
   weatherapi: weatherapiapikey
-
-background:
-  image: https://images.unsplash.com/photo-1506744038136-46273834b3fb
-  blur: md
-  brightness: 40
-  opacity: 70

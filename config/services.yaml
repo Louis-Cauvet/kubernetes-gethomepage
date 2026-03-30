@@ -12,7 +12,8 @@
         href: http://localhost/
         description: Homepage is the best
 
-- My Third Group:
-    - My Third Service:
-        href: http://localhost/
-        description: Homepage is 😎
+- My Calendar:
+    - Calendar :
+        widget:
+            type: calendar
+            view: monthly
