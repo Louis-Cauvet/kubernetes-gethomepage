@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-custom-js
+data:
+  custom.js: |
+{{ .Values.customJs | indent 4 }}

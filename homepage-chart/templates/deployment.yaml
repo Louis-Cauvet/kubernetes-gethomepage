@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+
+      containers:
+        - name: homepage
+
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }} 
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: {{ .Values.allowedHosts | quote }}
+
+          ports:
+            - containerPort: {{ .Values.service.port }}
+
+          livenessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 15
+
+          readinessProbe:
+            httpGet:
+              path: /api/healthcheck
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          volumeMounts:
+            - name: bookmarks
+              mountPath: /app/config/bookmarks.yaml
+              subPath: bookmarks.yaml
+
+            - name: services
+              mountPath: /app/config/services.yaml
+              subPath: services.yaml
+
+            - name: settings
+              mountPath: /app/config/settings.yaml
+              subPath: settings.yaml
+
+            - name: widgets
+              mountPath: /app/config/widgets.yaml
+              subPath: widgets.yaml
+
+            - name: docker
+              mountPath: /app/config/docker.yaml
+              subPath: docker.yaml
+
+            - name: kubernetes
+              mountPath: /app/config/kubernetes.yaml
+              subPath: kubernetes.yaml
+
+            - name: proxmox
+              mountPath: /app/config/proxmox.yaml
+              subPath: proxmox.yaml
+
+            - name: custom-css
+              mountPath: /app/config/custom.css
+              subPath: custom.css
+
+            - name: custom-js
+              mountPath: /app/config/custom.js
+              subPath: custom.js
+
+            - name: logs
+              mountPath: /app/config/logs
+
+      volumes:
+        - name: bookmarks
+          configMap:
+            name: {{ .Release.Name }}-bookmarks
+
+        - name: services
+          configMap:
+            name: {{ .Release.Name }}-services
+
+        - name: settings
+          configMap:
+            name: {{ .Release.Name }}-settings
+
+        - name: widgets
+          configMap:
+            name: {{ .Release.Name }}-widgets
+
+        - name: docker
+          configMap:
+            name: {{ .Release.Name }}-docker
+
+        - name: kubernetes
+          configMap:
+            name: {{ .Release.Name }}-kubernetes
+
+        - name: proxmox
+          configMap:
+            name: {{ .Release.Name }}-proxmox
+
+        - name: custom-css
+          configMap:
+            name: {{ .Release.Name }}-custom-css
+
+        - name: custom-js
+          configMap:
+            name: {{ .Release.Name }}-custom-js
+
+        - name: logs
+          emptyDir: {}

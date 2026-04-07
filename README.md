@@ -1,17 +1,69 @@
-# Homepage Kubernetes Setup
+# Homepage sur Kubernetes et Helm
 
-Ce projet deploie l'application `ghcr.io/gethomepage/homepage:latest` sur Kubernetes avec une configuration fournie par plusieurs `ConfigMap`.
+Ce projet deploie [`gethomepage.dev`](https://gethomepage.dev/) avec deux approches :
+
+- `k8s/` : manifests Kubernetes "bruts" (`kubectl apply`)
+- `homepage-chart/` : chart Helm parametrable
+
 
 ## Structure du projet
 
 ```text
 homepage/
-|-- config/   # fichiers de configuration locaux
-|-- k8s/      # manifests Kubernetes appliques au cluster
-`-- README.md
+|-- config/           # configuration source de Homepage
+|-- k8s/              # manifests Kubernetes prets a appliquer
+|-- homepage-chart/   # chart Helm
 ```
 
-## Demarrage
+## Prerequis
+
+Avant de demarrer, il faut avoir :
+
+- un cluster Kubernetes accessible avec `kubectl`
+- `kubectl` configuré sur le bon contexte
+- `helm` installé si vous utilisez le chart Helm
+
+Verification rapide :
+
+```bash
+kubectl config current-context
+kubectl get nodes
+helm version
+```
+
+## Option 1 : Demarrer Homepage avec Kubernetes (`k8s/`)
+
+Cette methode applique directement les fichiers YAML presents dans `k8s/`.
+
+### Ce que fait l'installation
+
+La commande :
+
+```bash
+kubectl apply -f k8s/
+```
+
+crée les ressources suivantes :
+
+- un `Deployment` nommé `homepage`
+- un `Service` `NodePort` nommé `homepage`
+- un `ServiceAccount` nommé `homepage`
+- un `ClusterRole` et un `ClusterRoleBinding` pour permettre a Homepage de lire certaines ressources du cluster
+- plusieurs `ConfigMap` montées dans `/app/config`
+
+Les fichiers de configuration Homepage sont injectés depuis des `ConfigMap` :
+
+- `bookmarks.yaml`
+- `services.yaml`
+- `settings.yaml`
+- `widgets.yaml`
+- `docker.yaml`
+- `kubernetes.yaml`
+- `proxmox.yaml`
+- `custom.css`
+- `custom.js`
+
+### Installation
 
 Depuis la racine du projet :
 
@@ -19,77 +71,39 @@ Depuis la racine du projet :
 kubectl apply -f k8s/
 ```
 
-Verifier ensuite que les ressources sont bien creees :
+Verifier ensuite :
 
 ```bash
 kubectl get pods
 kubectl get svc
+kubectl get configmaps
 kubectl get serviceaccount homepage
+kubectl get clusterrole homepage
+kubectl get clusterrolebinding homepage
 ```
 
-## Acces a l'application
+Suivre le démarrage :
 
-Le service Kubernetes est de type `NodePort` sur le port `30007`.
+```bash
+kubectl rollout status deployment/homepage
+```
+
+### Acces a l'application
+
+Le service expose Homepage en `NodePort` :
+
+- port applicatif : `3000`
+- port expose sur le cluster : `30007`
+
+Acces local :
 
 ```text
 http://localhost:30007
 ```
 
-Le port expose provient de [`k8s/service.yaml`](./k8s/service.yaml).
+Le port provient de [`k8s/service.yaml`]
 
-## Ressources deployees
-
-Le dossier `k8s/` contient notamment :
-
-- un `Deployment` nomme `homepage`
-- un `Service` `NodePort` nomme `homepage`
-- un `ServiceAccount` nomme `homepage`
-- un `ClusterRole` et un `ClusterRoleBinding` pour permettre a Homepage de lire des ressources Kubernetes
-- plusieurs `ConfigMap` montees dans `/app/config`
-
-## Mettre a jour la configuration
-
-La source appliquee au cluster est actuellement dans les manifests du dossier `k8s/`.
-Autrement dit, modifier uniquement un fichier dans `config/` ne met pas a jour le cluster tant que le `ConfigMap` correspondant dans `k8s/` n'est pas reapplique.
-
-Exemple pour les favoris :
-
-1. Modifier [`k8s/bookmarks-configmap.yaml`](./k8s/bookmarks-configmap.yaml)
-2. Reappliquer la configuration :
-
-```bash
-kubectl apply -f k8s/bookmarks-configmap.yaml
-```
-
-3. Redemarrer le deployment :
-
-```bash
-kubectl rollout restart deployment homepage
-```
-
-Tu peux faire la meme chose avec les autres fichiers :
-
-- `k8s/services-configmap.yaml`
-- `k8s/settings-configmap.yaml`
-- `k8s/widgets-configmap.yaml`
-- `k8s/docker-configmap.yaml`
-- `k8s/kubernetes-configmap.yaml`
-- `k8s/proxmox-configmap.yaml`
-- `k8s/custom-css-configmap.yaml`
-- `k8s/custom-js-configmap.yaml`
-
-## Pourquoi un redemarrage est necessaire
-
-Les fichiers de configuration sont montes avec `subPath` dans le conteneur via le `Deployment`.
-Dans ce mode, les mises a jour de `ConfigMap` ne sont pas rechargees automatiquement par le pod existant.
-
-## Commandes utiles
-
-Voir l'etat du deploiement :
-
-```bash
-kubectl get all
-```
+### Commandes utiles avec `kubectl`
 
 Voir les logs :
 
@@ -97,19 +111,13 @@ Voir les logs :
 kubectl logs deployment/homepage
 ```
 
-Redemarrer l'application :
+Décrire le déploiement :
 
 ```bash
-kubectl rollout restart deployment homepage
+kubectl describe deployment homepage
 ```
 
-Suivre le rollout :
-
-```bash
-kubectl rollout status deployment homepage
-```
-
-Decrire un pod :
+Décrire un pod :
 
 ```bash
 kubectl describe pod <nom-du-pod>
@@ -121,29 +129,203 @@ Lister les `ConfigMap` :
 kubectl get configmaps
 ```
 
-Afficher une `ConfigMap` :
+Redémarrer l'application :
 
 ```bash
-kubectl describe configmap homepage-bookmarks
+kubectl rollout restart deployment/homepage
 ```
 
-Voir l'utilisation CPU/memoire si `metrics-server` est installe :
+### Mettre a jour la configuration en mode Kubernetes
+
+En mode `k8s/`, la source de vérité pour le cluster est le contenu du dossier `k8s/`.
+Modifier uniquement un fichier dans `config/` ne met rien a jour tant que le `ConfigMap` correspondant n'est pas réappliqué.
+
+Exemple pour les favoris :
+
+1. Modifier [`k8s/bookmarks-configmap.yaml`]
+2. Réappliquer le manifest :
 
 ```bash
-kubectl top pods
+kubectl apply -f k8s/bookmarks-configmap.yaml
 ```
 
-## Suppression
+3. Redémarrer Homepage :
 
-Pour supprimer l'application :
+```bash
+kubectl rollout restart deployment/homepage
+kubectl rollout status deployment/homepage
+```
+
+Le même principe s'applique à :
+
+- `k8s/services-configmap.yaml`
+- `k8s/settings-configmap.yaml`
+- `k8s/widgets-configmap.yaml`
+- `k8s/docker-configmap.yaml`
+- `k8s/kubernetes-configmap.yaml`
+- `k8s/proxmox-configmap.yaml`
+- `k8s/custom-css-configmap.yaml`
+- `k8s/custom-js-configmap.yaml`
+
+
+### Suppression du service
 
 ```bash
 kubectl delete -f k8s/
 ```
 
-## Notes importantes
+## Option 2 : Demarrer Homepage avec Helm (`homepage-chart/`)
 
-- Les manifests utilisent le namespace `default`.
-- Le `ServiceAccount` et le `ClusterRoleBinding` pointent aussi vers `default`.
-- La variable `HOMEPAGE_ALLOWED_HOSTS` autorise `localhost:30007` et l'IP du pod.
-- Si `http://localhost:30007` ne repond pas, verifie que ton cluster expose bien les `NodePort` sur ta machine locale.
+Cette méthode utilise le chart Helm du projet pour génerer puis installer les ressources Kubernetes.
+
+### Ce que fait Helm ici
+
+Helm :
+
+- lit `homepage-chart/Chart.yaml`
+- charge les valeurs par défaut depuis `homepage-chart/values.yaml`
+- rend les templates du dossier `homepage-chart/templates/`
+- installe les objets dans Kubernetes sous forme de release Helm
+
+
+### Installation Helm
+
+Depuis la racine du projet :
+
+```bash
+helm install homepage ./homepage-chart
+```
+
+Verifier l'installation :
+
+```bash
+helm list
+kubectl get pods
+kubectl get svc
+kubectl get configmaps
+```
+
+Suivre le déploiement :
+
+```bash
+kubectl rollout status deployment/homepage
+```
+
+### Accès a l'application
+
+Par defaut, le chart expose Homepage en `NodePort` sur `30007` :
+
+```text
+http://localhost:30007
+```
+
+### Personnalisation via `values.yaml`
+
+Le fichier principal de configuration du chart est :
+
+- [`homepage-chart/values.yaml`]
+
+On peut y modifier notamment :
+
+- l'image Docker
+- le nombre de replicas
+- le type de service
+- le `nodePort`
+- les ressources CPU / memoire
+- tout le contenu des fichiers Homepage (`bookmarks`, `services`, `settings`, `widgets`, etc.)
+
+### Mettre a jour une installation Helm
+
+Si vous modifiez `homepage-chart/values.yaml` ou un template du chart :
+
+```bash
+helm upgrade homepage ./homepage-chart
+```
+
+Verifier ensuite :
+
+```bash
+helm status homepage
+kubectl rollout status deployment/homepage
+```
+
+### Commandes Helm utiles
+
+Voir le manifeste genéré sans installer :
+
+```bash
+helm template homepage ./homepage-chart
+```
+
+Installer une release :
+
+```bash
+helm install homepage ./homepage-chart
+```
+
+Afficher les valeurs utilisees :
+
+```bash
+helm get values homepage
+```
+
+Afficher l'état de la release :
+
+```bash
+helm status homepage
+```
+
+Lister les releases :
+
+```bash
+helm list
+```
+
+Voir l'historique des révisions :
+
+```bash
+helm history homepage
+```
+
+Revenir a une révision précedente :
+
+```bash
+helm rollback homepage <revision>
+```
+
+Supprimer la release :
+
+```bash
+helm uninstall homepage
+```
+
+### Ce qu'il faut savoir sur le chart actuel
+
+Le chart utilise le nom de release Helm pour nommer la plupart des ressources.
+Avec cette commande :
+
+```bash
+helm install homepage ./homepage-chart
+```
+
+vous obtiendrez notamment :
+
+- un `Deployment` `homepage`
+- un `Service` `homepage`
+- des `ConfigMap` comme `homepage-bookmarks`, `homepage-services`, `homepage-settings`
+
+
+## Quelle methode choisir ?
+
+Utiliser `k8s/` si vous voulez :
+
+- appliquer des manifests simples et explicites
+- voir directement les ressources YAML finales
+- travailler sans Helm
+
+Utiliser `homepage-chart/` si vous voulez :
+
+- parametrer facilement le deploiement
+- gerer les mises a jour avec `helm upgrade`
+- beneficier de `helm history`, `helm rollback` et `helm template`
+

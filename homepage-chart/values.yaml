@@ -1,0 +1,141 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/gethomepage/homepage
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: NodePort
+  port: 3000
+  nodePort: 30007
+
+serviceAccount:
+  create: true
+  name: homepage
+
+allowedHosts: "$(MY_POD_IP):3000,localhost:30007"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+bookmarks: |
+  ---
+  # For configuration options and examples:
+  # https://gethomepage.dev/configs/bookmarks
+
+  - Developer:
+      - Github:
+          - abbr: GH
+            href: https://github.com/
+
+  - Entertainment:
+      - YouTube:
+          - abbr: YT
+            href: https://youtube.com/
+
+
+customCss: |
+  #page_wrapper {
+    background:
+      radial-gradient(circle at 10% 14%, rgba(125, 211, 252, 0.30) 0%, transparent 16%),
+      radial-gradient(circle at 18% 78%, rgba(6, 182, 212, 0.18) 0%, transparent 20%),
+      radial-gradient(circle at 32% 36%, rgba(56, 189, 248, 0.12) 0%, transparent 18%),
+      radial-gradient(circle at 84% 12%, rgba(96, 165, 250, 0.24) 0%, transparent 18%),
+      radial-gradient(circle at 76% 64%, rgba(59, 130, 246, 0.18) 0%, transparent 24%),
+      radial-gradient(circle at 58% 88%, rgba(14, 165, 233, 0.14) 0%, transparent 24%),
+      radial-gradient(circle at 50% 110%, rgba(8, 145, 178, 0.16) 0%, transparent 30%),
+      linear-gradient(120deg, rgba(255, 255, 255, 0.050) 0%, transparent 30%),
+      linear-gradient(300deg, rgba(56, 189, 248, 0.060) 10%, transparent 34%),
+      linear-gradient(200deg, rgba(14, 165, 233, 0.040) 18%, transparent 42%),
+      linear-gradient(145deg, #020617 0%, #081120 22%, #0f172a 48%, #111827 74%, #172554 100%);
+    background-attachment: fixed;
+    background-color: #020617;
+  }
+
+
+customJs: |
+  console.log("Homepage custom JS loaded");
+
+
+dockerConfig: |
+  ---
+  # For configuration options and examples:
+  # https://gethomepage.dev/configs/docker/
+
+  # my-docker:
+  #   host: 127.0.0.1
+  #   port: 2375
+
+  # my-docker:
+  #   socket: /var/run/docker.sock
+
+
+kubernetesConfig: |
+  ---
+  # sample kubernetes config
+
+
+proxmoxConfig: |
+  ---
+  # pve:
+  #   url: https://proxmox.host.or.ip:8006
+  #   token: username@pam!Token ID
+  #   secret: secret
+
+
+services: |
+  ---
+  # For configuration options and examples:
+  # https://gethomepage.dev/configs/services/
+
+  - Dev:
+      - Mon site local:
+          href: http://localhost:3000/
+          description: Mon site local
+
+  - My Second Group:
+      - My Second Service:
+          href: http://localhost/
+          description: Homepage is the best
+
+  - My Calendar:
+      - Calendar:
+          widget:
+            type: calendar
+            view: monthly
+
+
+settings: |
+  ---
+  # For configuration options and examples:
+  # https://gethomepage.dev/configs/settings/
+
+  title: Dashboard Louis Cauvet
+  theme: dark
+  color: slate
+
+  providers:
+    openweathermap: openweathermapapikey
+    weatherapi: weatherapiapikey
+
+
+widgets: |
+  ---
+  # For configuration options and examples:
+  # https://gethomepage.dev/configs/info-widgets/
+
+  - resources:
+      cpu: true
+      memory: true
+      disk: /
+
+  - search:
+      provider: google
+      showSearchSuggestions: true
+      target: _blank

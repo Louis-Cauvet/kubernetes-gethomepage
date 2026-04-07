@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-proxmox
+data:
+  proxmox.yaml: |
+{{ .Values.proxmoxConfig | indent 4 }}

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-docker
+data:
+  docker.yaml: |
+{{ .Values.dockerConfig | indent 4 }}
