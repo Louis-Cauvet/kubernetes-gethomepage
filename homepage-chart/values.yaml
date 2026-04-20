@@ -29,15 +29,24 @@ bookmarks: |
   # For configuration options and examples:
   # https://gethomepage.dev/configs/bookmarks
 
-  - Developer:
-      - Github:
-          - abbr: GH
-            href: https://github.com/
+  - Transports & Réservations:
+      - 12Go Asia:
+          - abbr: 12G
+            href: https://12go.asia/
+      - Agoda:
+          - abbr: AG
+            href: https://www.agoda.com/
+      - Booking:
+          - abbr: BK
+            href: https://www.booking.com/
 
-  - Entertainment:
-      - YouTube:
-          - abbr: YT
-            href: https://youtube.com/
+  - Utilitaires:
+      - Convertisseur EUR/THB:
+          - abbr: THB
+            href: https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=THB
+      - Google Translate:
+          - abbr: GT
+            href: https://translate.google.com/?sl=auto&tl=th&op=translate
 
 
 customCss: |
@@ -94,21 +103,23 @@ services: |
   # For configuration options and examples:
   # https://gethomepage.dev/configs/services/
 
-  - Dev:
-      - Mon site local:
-          href: http://localhost:3000/
-          description: Mon site local
+  - Planification & Guide:
+      - Notion Itinéraire:
+          href: https://notion.so/
+          description: "Notre itinéraire détaillé jour par jour"
+          icon: notion
+      - Google Maps:
+          href: https://maps.google.com/
+          description: "Cartes et lieux sauvegardés"
+          icon: google-maps
 
-  - My Second Group:
-      - My Second Service:
-          href: http://localhost/
-          description: Homepage is the best
-
-  - My Calendar:
-      - Calendar:
-          widget:
-            type: calendar
-            view: monthly
+  - Découverte:
+      - Lonely Planet Thaïlande:
+          href: https://www.lonelyplanet.com/thailand
+          description: "Guides et recommandations"
+      - TripAdvisor:
+          href: https://www.tripadvisor.fr/Tourism-g293915-Thailand-Vacations.html
+          description: "Activités, restaurants et avis"
 
 
 settings: |
@@ -116,7 +127,7 @@ settings: |
   # For configuration options and examples:
   # https://gethomepage.dev/configs/settings/
 
-  title: Dashboard Louis Cauvet
+  title: 🇹🇭 Compagnon de Voyage - Thaïlande
   theme: dark
   color: slate
 
@@ -130,10 +141,30 @@ widgets: |
   # For configuration options and examples:
   # https://gethomepage.dev/configs/info-widgets/
 
-  - resources:
-      cpu: true
-      memory: true
-      disk: /
+  - datetime:
+      text: Heure locale (Bangkok)
+      timezone: Asia/Bangkok
+
+  - openmeteo:
+      label: Bangkok
+      latitude: 13.7563
+      longitude: 100.5018
+      timezone: Asia/Bangkok
+      units: metric
+
+  - openmeteo:
+      label: Chiang Mai
+      latitude: 18.7883
+      longitude: 98.9853
+      timezone: Asia/Bangkok
+      units: metric
+      
+  - openmeteo:
+      label: Phuket
+      latitude: 7.8804
+      longitude: 98.3922
+      timezone: Asia/Bangkok
+      units: metric
 
   - search:
       provider: google
