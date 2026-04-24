@@ -242,3 +242,7 @@ En pratique, le passage de `k8s/` à Helm apporte surtout trois bénéfices :
 - une meilleure maintenabilité si le service doit évoluer ou être redéployé plusieurs fois
 
 En résumé, la méthode `homepage-chart/` est préférable pour un déploiement plus industrialisé et plus simple à administrer dans le temps.
+
+## 4. Schéma de l'infrastructure Kubernetes : 
+
+![alt text](images/kubernetes-schema.png)
