@@ -1,5 +1,24 @@
 replicaCount: 1
 
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+
 image:
   repository: ghcr.io/gethomepage/homepage
   tag: latest
@@ -19,7 +38,7 @@ allowedHosts: "$(MY_POD_IP):3000,localhost:30007"
 resources:
   requests:
     cpu: 50m
-    memory: 64Mi
+    memory: 200Mi
   limits:
     cpu: 300m
     memory: 256Mi
