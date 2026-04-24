@@ -1,0 +1,46 @@
+kube-prometheus-stack:
+
+  grafana:
+    adminPassword: admin
+    service:
+      type: NodePort
+      nodePort: 30080
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 300m
+        memory: 512Mi
+
+  prometheus:
+    prometheusSpec:
+      retention: 10d
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      storageSpec: {}
+
+  alertmanager:
+    alertmanagerSpec:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 100m
+          memory: 128Mi
+
+  # etcd metrics inaccessible sur la plupart des clusters managés
+  kubeEtcd:
+    enabled: false
+
+  # Docker Desktop ne supporte pas le montage shared/slave de /
+  nodeExporter:
+    enabled: false
