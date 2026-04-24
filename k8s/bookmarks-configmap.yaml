@@ -5,15 +5,24 @@ metadata:
 data:
   bookmarks.yaml: |
     ---
-    # For configuration options and examples, please see:
+    # For configuration options and examples:
     # https://gethomepage.dev/configs/bookmarks
 
-    - Developer:
-        - Github:
-            - abbr: GH
-              href: https://github.com/
+    - Transports & Réservations:
+      - 12Go Asia:
+          - abbr: 12G
+            href: https://12go.asia/
+      - Agoda:
+          - abbr: AG
+            href: https://www.agoda.com/
+      - Booking:
+          - abbr: BK
+            href: https://www.booking.com/
 
-    - Entertainment:
-        - YouTube:
-            - abbr: YT
-              href: https://youtube.com/
+    - Utilitaires:
+      - Convertisseur EUR/THB:
+          - abbr: THB
+            href: https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=THB
+      - Google Translate:
+          - abbr: GT
+            href: https://translate.google.com/?sl=auto&tl=th&op=translate
