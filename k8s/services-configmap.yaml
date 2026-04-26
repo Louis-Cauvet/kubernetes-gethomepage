@@ -5,21 +5,23 @@ metadata:
 data:
   services.yaml: |
     ---
-    # For configuration options and examples, please see:
+    # For configuration options and examples:
     # https://gethomepage.dev/configs/services/
 
-    - Dev:
-        - Mon site local:
-            href: http://localhost:3000/
-            description: Mon site local
+    - Planification & Guide:
+      - Notion Itinéraire:
+          href: https://notion.so/
+          description: "Notre itinéraire détaillé jour par jour"
+          icon: notion
+      - Google Maps:
+          href: https://maps.google.com/
+          description: "Cartes et lieux sauvegardés"
+          icon: google-maps
 
-    - My Second Group:
-        - My Second Service:
-            href: http://localhost/
-            description: Homepage is the best
-
-    - My Calendar:
-        - Calendar :
-            widget:
-              type: calendar
-              view: monthly
+    - Découverte:
+      - Lonely Planet Thaïlande:
+          href: https://www.lonelyplanet.com/thailand
+          description: "Guides et recommandations"
+      - TripAdvisor:
+          href: https://www.tripadvisor.fr/Tourism-g293915-Thailand-Vacations.html
+          description: "Activités, restaurants et avis"

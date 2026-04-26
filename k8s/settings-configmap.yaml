@@ -5,10 +5,10 @@ metadata:
 data:
   settings.yaml: |
     ---
-    # For configuration options and examples, please see:
+    # For configuration options and examples:
     # https://gethomepage.dev/configs/settings/
 
-    title: Dashboard Louis Cauvet
+    title: 🇹🇭 Compagnon de Voyage - Thaïlande
     theme: dark
     color: slate
 

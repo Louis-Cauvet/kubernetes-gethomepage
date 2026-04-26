@@ -1,69 +1,37 @@
-# Homepage sur Kubernetes et Helm
+# Déploiement de Homepage
 
-Ce projet deploie [`gethomepage.dev`](https://gethomepage.dev/) avec deux approches :
+Ce projet permet de déployer [`gethomepage.dev`](https://gethomepage.dev/) sur Kubernetes avec deux approches :
 
-- `k8s/` : manifests Kubernetes "bruts" (`kubectl apply`)
-- `homepage-chart/` : chart Helm parametrable
+- `k8s/` : manifests Kubernetes classiques, méthode par défaut
+- `homepage-chart/` : chart Helm, méthode optimisée
 
+## Prérequis
 
-## Structure du projet
+Avant de commencer, il faut disposer de :
 
-```text
-homepage/
-|-- config/           # configuration source de Homepage
-|-- k8s/              # manifests Kubernetes prets a appliquer
-|-- homepage-chart/   # chart Helm
-```
+- `kubectl` configuré sur un cluster Kubernetes accessible
+- `helm` installé (si vous optez pour la méthode Helm)
 
-## Prerequis
-
-Avant de demarrer, il faut avoir :
-
-- un cluster Kubernetes accessible avec `kubectl`
-- `kubectl` configuré sur le bon contexte
-- `helm` installé si vous utilisez le chart Helm
-
-Verification rapide :
+Commandes de vérification :
 
 ```bash
 kubectl config current-context
 kubectl get nodes
+```
+Ces commandes permettent de vérifier que l'on est connecté au bon cluster Kubernetes.
+Si vous optez pour l'option via Helm, exécutez également :
+
+```bash
 helm version
 ```
 
-## Option 1 : Demarrer Homepage avec Kubernetes (`k8s/`)
+afin de vérifier que Helm est bien disponible sur la machine.
 
-Cette methode applique directement les fichiers YAML presents dans `k8s/`.
+## 1. Installer Homepage avec les deux méthodes
 
-### Ce que fait l'installation
+### Méthode 1 : installation avec les manifests `k8s/`
 
-La commande :
-
-```bash
-kubectl apply -f k8s/
-```
-
-crée les ressources suivantes :
-
-- un `Deployment` nommé `homepage`
-- un `Service` `NodePort` nommé `homepage`
-- un `ServiceAccount` nommé `homepage`
-- un `ClusterRole` et un `ClusterRoleBinding` pour permettre a Homepage de lire certaines ressources du cluster
-- plusieurs `ConfigMap` montées dans `/app/config`
-
-Les fichiers de configuration Homepage sont injectés depuis des `ConfigMap` :
-
-- `bookmarks.yaml`
-- `services.yaml`
-- `settings.yaml`
-- `widgets.yaml`
-- `docker.yaml`
-- `kubernetes.yaml`
-- `proxmox.yaml`
-- `custom.css`
-- `custom.js`
-
-### Installation
+Cette méthode applique directement les fichiers YAML présents dans le dossier `k8s/`.
 
 Depuis la racine du projet :
 
@@ -71,261 +39,183 @@ Depuis la racine du projet :
 kubectl apply -f k8s/
 ```
 
-Verifier ensuite :
+Cette commande crée l'ensemble des ressources Kubernetes décrites dans le dossier `k8s/`, comme le `Deployment`, le `Service`, le `ServiceAccount`, les droits RBAC et les `ConfigMap`.
+
+### Méthode 2 : installation avec Helm (`homepage-chart/`)
+
+Cette méthode utilise le chart Helm du projet pour générer et installer les ressources Kubernetes.
+
+Depuis la racine du projet :
+
+```bash
+helm install homepage ./homepage-chart
+```
+
+Cette commande installe une release Helm nommée `homepage` à partir du chart local contenu dans `homepage-chart/`.
+
+### Vérification du bon déploiement du service
+
+Afin de vérifier que le service est bien déployé, vous pouvez exécuter :
 
 ```bash
 kubectl get pods
 kubectl get svc
-kubectl get configmaps
-kubectl get serviceaccount homepage
-kubectl get clusterrole homepage
-kubectl get clusterrolebinding homepage
-```
-
-Suivre le démarrage :
-
-```bash
 kubectl rollout status deployment/homepage
 ```
 
-### Acces a l'application
+Rôle de ces commandes :
 
-Le service expose Homepage en `NodePort` :
+- `kubectl get pods` affiche les pods créés pour vérifier qu'ils sont bien démarrés
+- `kubectl get svc` affiche les services du cluster, notamment le service `homepage`
+- `kubectl rollout status deployment/homepage` suit l'avancement du déploiement et confirme qu'il s'est terminé correctement
 
-- port applicatif : `3000`
-- port expose sur le cluster : `30007`
-
-Acces local :
+Dans les 2 méthodes, le service est exposé en `NodePort` sur le port `30007` :
 
 ```text
 http://localhost:30007
 ```
 
-Le port provient de [`k8s/service.yaml`]
-
-### Commandes utiles avec `kubectl`
-
-Voir les logs :
+Voici également quelques commandes utiles de supervision :
 
 ```bash
 kubectl logs deployment/homepage
-```
-
-Décrire le déploiement :
-
-```bash
 kubectl describe deployment homepage
-```
-
-Décrire un pod :
-
-```bash
 kubectl describe pod <nom-du-pod>
 ```
 
-Lister les `ConfigMap` :
+Rôle de ces commandes :
+
+- `kubectl logs deployment/homepage` affiche les journaux de l'application pour repérer une erreur de démarrage ou de configuration
+- `kubectl describe deployment homepage` donne le détail du déploiement et de son état courant
+- `kubectl describe pod <nom-du-pod>` permet d'inspecter un pod précis, utile pour comprendre pourquoi il ne démarre pas ou redémarre en boucle
+
+et pour la méthode avec Helm, vous pouvez également exécuter : 
 
 ```bash
-kubectl get configmaps
+helm get values homepage
+helm history homepage
 ```
 
-Redémarrer l'application :
+Rôle de ces commandes :
 
-```bash
-kubectl rollout restart deployment/homepage
-```
+- `helm get values homepage` affiche les valeurs utilisées par la release, ce qui permet de vérifier la configuration réellement appliquée
+- `helm history homepage` liste les différentes révisions de la release, utile pour suivre les mises à jour et préparer un éventuel retour arrière
 
-### Mettre a jour la configuration en mode Kubernetes
+### Suppression du déploiement
 
-En mode `k8s/`, la source de vérité pour le cluster est le contenu du dossier `k8s/`.
-Modifier uniquement un fichier dans `config/` ne met rien a jour tant que le `ConfigMap` correspondant n'est pas réappliqué.
-
-Exemple pour les favoris :
-
-1. Modifier [`k8s/bookmarks-configmap.yaml`]
-2. Réappliquer le manifest :
-
-```bash
-kubectl apply -f k8s/bookmarks-configmap.yaml
-```
-
-3. Redémarrer Homepage :
-
-```bash
-kubectl rollout restart deployment/homepage
-kubectl rollout status deployment/homepage
-```
-
-Le même principe s'applique à :
-
-- `k8s/services-configmap.yaml`
-- `k8s/settings-configmap.yaml`
-- `k8s/widgets-configmap.yaml`
-- `k8s/docker-configmap.yaml`
-- `k8s/kubernetes-configmap.yaml`
-- `k8s/proxmox-configmap.yaml`
-- `k8s/custom-css-configmap.yaml`
-- `k8s/custom-js-configmap.yaml`
-
-
-### Suppression du service
+Pour supprimer le déploiement instancié avec les manifests `k8s/`, il faut exécuter :
 
 ```bash
 kubectl delete -f k8s/
 ```
 
-## Option 2 : Demarrer Homepage avec Helm (`homepage-chart/`)
+Cette commande supprime toutes les ressources créées à partir des manifests du dossier `k8s/`.
+   
 
-Cette méthode utilise le chart Helm du projet pour génerer puis installer les ressources Kubernetes.
-
-### Ce que fait Helm ici
-
-Helm :
-
-- lit `homepage-chart/Chart.yaml`
-- charge les valeurs par défaut depuis `homepage-chart/values.yaml`
-- rend les templates du dossier `homepage-chart/templates/`
-- installe les objets dans Kubernetes sous forme de release Helm
-
-
-### Installation Helm
-
-Depuis la racine du projet :
-
-```bash
-helm install homepage ./homepage-chart
-```
-
-Verifier l'installation :
-
-```bash
-helm list
-kubectl get pods
-kubectl get svc
-kubectl get configmaps
-```
-
-Suivre le déploiement :
-
-```bash
-kubectl rollout status deployment/homepage
-```
-
-### Accès a l'application
-
-Par defaut, le chart expose Homepage en `NodePort` sur `30007` :
-
-```text
-http://localhost:30007
-```
-
-### Personnalisation via `values.yaml`
-
-Le fichier principal de configuration du chart est :
-
-- [`homepage-chart/values.yaml`]
-
-On peut y modifier notamment :
-
-- l'image Docker
-- le nombre de replicas
-- le type de service
-- le `nodePort`
-- les ressources CPU / memoire
-- tout le contenu des fichiers Homepage (`bookmarks`, `services`, `settings`, `widgets`, etc.)
-
-### Mettre a jour une installation Helm
-
-Si vous modifiez `homepage-chart/values.yaml` ou un template du chart :
-
-```bash
-helm upgrade homepage ./homepage-chart
-```
-
-Verifier ensuite :
-
-```bash
-helm status homepage
-kubectl rollout status deployment/homepage
-```
-
-### Commandes Helm utiles
-
-Voir le manifeste genéré sans installer :
-
-```bash
-helm template homepage ./homepage-chart
-```
-
-Installer une release :
-
-```bash
-helm install homepage ./homepage-chart
-```
-
-Afficher les valeurs utilisees :
-
-```bash
-helm get values homepage
-```
-
-Afficher l'état de la release :
-
-```bash
-helm status homepage
-```
-
-Lister les releases :
-
-```bash
-helm list
-```
-
-Voir l'historique des révisions :
-
-```bash
-helm history homepage
-```
-
-Revenir a une révision précedente :
-
-```bash
-helm rollback homepage <revision>
-```
-
-Supprimer la release :
+Si vous avez instancié le service avec Helm, la commande de désinstallation est :
 
 ```bash
 helm uninstall homepage
 ```
 
-### Ce qu'il faut savoir sur le chart actuel
+qui supprime la release Helm et les ressources Kubernetes associées.
 
-Le chart utilise le nom de release Helm pour nommer la plupart des ressources.
-Avec cette commande :
+
+## 2. Auto-scaling horizontal (HPA)
+
+Le projet inclut un `HorizontalPodAutoscaler` qui ajuste automatiquement le nombre de pods en fonction de la charge CPU. Le nombre de replicas varie entre **1** (minimum) et **3** (maximum), avec un seuil de déclenchement à **70% d'utilisation CPU**.
+
+### Prérequis : Metrics Server
+
+Le HPA nécessite que le **Metrics Server** soit installé dans le cluster. Sans lui, le HPA ne peut pas lire les métriques et reste inactif.
+
+Vérifier s'il est présent :
+
+```bash
+kubectl get deployment metrics-server -n kube-system
+```
+
+Si la colonne `READY` affiche `0/1`, le Metrics Server est installé mais non fonctionnel. Sur les clusters locaux (kind, k3s, Minikube), il faut désactiver la vérification TLS :
+
+```bash
+# Télécharger le manifest officiel et ajouter --kubelet-insecure-tls
+Invoke-WebRequest "https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml" -OutFile "$env:TEMP\metrics-server.yaml"
+$content = Get-Content "$env:TEMP\metrics-server.yaml" -Raw
+$content = $content -replace "- --metric-resolution=15s", "- --metric-resolution=15s`r`n        - --kubelet-insecure-tls"
+$content | Out-File "$env:TEMP\metrics-server-fixed.yaml" -Encoding utf8
+kubectl apply -f "$env:TEMP\metrics-server-fixed.yaml"
+```
+
+Vérifier que le Metrics Server est opérationnel :
+
+```bash
+kubectl top nodes
+```
+
+### Déploiement du HPA
+
+**Avec Helm** (recommandé) — le HPA est activé par défaut dans `homepage-chart/values.yaml` :
 
 ```bash
 helm install homepage ./homepage-chart
 ```
 
-vous obtiendrez notamment :
+**Avec les manifests `k8s/`** :
 
-- un `Deployment` `homepage`
-- un `Service` `homepage`
-- des `ConfigMap` comme `homepage-bookmarks`, `homepage-services`, `homepage-settings`
+```bash
+kubectl apply -f k8s/hpa.yaml
+```
 
+### Vérification
 
-## Quelle methode choisir ?
+```bash
+kubectl get hpa homepage
+kubectl describe hpa homepage
+```
 
-Utiliser `k8s/` si vous voulez :
+La colonne `TARGETS` doit afficher une valeur réelle, par exemple `4%/70%`. Si elle affiche `<unknown>/70%`, attendre 1 à 2 minutes le temps que les métriques se stabilisent après le démarrage des pods.
 
-- appliquer des manifests simples et explicites
-- voir directement les ressources YAML finales
-- travailler sans Helm
+### Configuration
 
-Utiliser `homepage-chart/` si vous voulez :
+Les paramètres du HPA sont centralisés dans `homepage-chart/values.yaml` :
 
-- parametrer facilement le deploiement
-- gerer les mises a jour avec `helm upgrade`
-- beneficier de `helm history`, `helm rollback` et `helm template`
+```yaml
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0      # scale up immédiat
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300    # attendre 5 min avant de réduire
+      policies:
+        - type: Percent
+          value: 50
+          periodSeconds: 60
+```
 
+La fenêtre de stabilisation de 300 secondes en scale down évite les oscillations : le HPA attend 5 minutes de charge faible avant de supprimer des pods.
+
+## 3. Analyse comparative : `k8s/` vs Helm
+
+Pour avoir mis en place les 2 méthodes, on constate que l'approche `k8s/` est pratique pour comprendre Kubernetes et chacun de ces manifests de configuration, mais qu'elle devient vite lourde à maintenir dès qu'il faut faire évoluer cette configuration ou rejouer proprement des mises à jour.
+
+L'approche Helm apporte une couche d'abstraction, grâce aux variables centralisées dans `homepage-chart/values.yaml`. Cela rend le déploiement plus réutilisable, plus configurable et plus propre à faire évoluer. Helm facilite aussi l'exploitation grâce à des commandes natives comme `helm upgrade`, `helm history`, `helm rollback` ou `helm uninstall`.
+
+En pratique, le passage de `k8s/` à Helm apporte surtout trois bénéfices :
+
+- une configuration centralisée et plus facile à personnaliser
+- des mises à jour plus propres avec versionnement des releases
+- une meilleure maintenabilité si le service doit évoluer ou être redéployé plusieurs fois
+
+En résumé, la méthode `homepage-chart/` est préférable pour un déploiement plus industrialisé et plus simple à administrer dans le temps.
+
+## 4. Schéma de l'infrastructure Kubernetes : 
+
+![alt text](images/kubernetes-schema.png)

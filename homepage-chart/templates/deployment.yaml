@@ -3,7 +3,9 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
 
   selector:
     matchLabels:
@@ -15,6 +17,16 @@ spec:
 
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: {{ .Release.Name }}
+                topologyKey: kubernetes.io/hostname
 
       containers:
         - name: homepage
@@ -55,15 +67,15 @@ spec:
             httpGet:
               path: /api/healthcheck
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 15
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
 
           readinessProbe:
             httpGet:
               path: /api/healthcheck
               port: {{ .Values.service.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
 
           volumeMounts:
             - name: bookmarks
