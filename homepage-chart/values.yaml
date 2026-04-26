@@ -45,39 +45,56 @@ resources:
 
 probes:
   liveness:
-    initialDelaySeconds: 5
-    periodSeconds: 15
+    initialDelaySeconds: 1
+    periodSeconds: 5
   readiness:
-    initialDelaySeconds: 5
-    periodSeconds: 10
+    initialDelaySeconds: 1
+    periodSeconds: 5
 
 bookmarks: |
   ---
-  # For configuration options and examples:
-  # https://gethomepage.dev/configs/bookmarks
+  - 🔍 Exploration:
+      - Lonely Planet Thaïlande:
+          - abbr: LP
+            href: https://www.lonelyplanet.com/thailand
+      - TripAdvisor Thaïlande:
+          - abbr: TA
+            href: https://www.tripadvisor.fr/Tourism-g293915-Thailand-Vacations.html
+      - GetYourGuide:
+          - abbr: GYG
+            href: https://www.getyourguide.fr/
+      - Viator:
+          - abbr: VI
+            href: https://www.viator.com/
 
-  - Transports & Réservations:
-      - 12Go Asia:
-          - abbr: 12G
-            href: https://12go.asia/
-      - Agoda:
-          - abbr: AG
-            href: https://www.agoda.com/
-      - Booking:
-          - abbr: BK
-            href: https://www.booking.com/
-
-  - Utilitaires:
+  - 💱 Finance & Pratique:
       - Convertisseur EUR/THB:
-          - abbr: THB
+          - abbr: XE
             href: https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=THB
+      - Wise — Transfert:
+          - abbr: WI
+            href: https://wise.com/
       - Google Translate:
           - abbr: GT
             href: https://translate.google.com/?sl=auto&tl=th&op=translate
+      - Infos Visa Thaïlande:
+          - abbr: VISA
+            href: https://www.thaiembassy.com/thailand-visa/
+
+  - 🌐 Connectivité:
+      - WhatsApp Web:
+          - abbr: WA
+            href: https://web.whatsapp.com/
+      - Google Drive:
+          - abbr: GD
+            href: https://drive.google.com/
+      - Météo Thaïlande:
+          - abbr: MÉT
+            href: https://www.meteoblue.com/fr/meteo/prevision/semaine/tha%c3%aflande
 
 
 customCss: |
-  #page_wrapper {
+ #page_wrapper {
     background:
       radial-gradient(circle at 10% 14%, rgba(125, 211, 252, 0.30) 0%, transparent 16%),
       radial-gradient(circle at 18% 78%, rgba(6, 182, 212, 0.18) 0%, transparent 20%),
@@ -92,6 +109,51 @@ customCss: |
       linear-gradient(145deg, #020617 0%, #081120 22%, #0f172a 48%, #111827 74%, #172554 100%);
     background-attachment: fixed;
     background-color: #020617;
+  }
+
+  /* Titre sur sa propre ligne, météo en dessous */
+  #information-widgets {
+    flex-wrap: wrap !important;
+    row-gap: 0.5rem;
+  }
+
+  #information-widgets > *:first-child {
+    flex-basis: 100% !important;
+    flex-direction: column;
+  }
+
+  #widgets-wrap > * {
+    text-align: start;
+    align-self: flex-start;
+  }
+
+  #widgets-wrap .widget-container:last-child {
+    translate: 0 25px;
+  }
+
+  #information-widgets-right {
+    margin: 0;
+    width: 100%;
+  }
+
+  #information-widgets-right form {
+    width: 100%;
+    max-width : 200px; 
+    margin-left: auto;
+  }
+
+  .information-widget-datetime {
+    margin-right: 20px;
+  }
+
+  .service-card, .bookmark-card {
+    border: 1px solid rgba(251, 191, 36, 0.20) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .service-card:hover, .bookmark-card:hover {
+    border-color: rgba(251, 191, 36, 0.55) !important;
+    box-shadow: 0 0 14px rgba(251, 191, 36, 0.08);
   }
 
 
@@ -127,36 +189,76 @@ proxmoxConfig: |
 
 services: |
   ---
-  # For configuration options and examples:
-  # https://gethomepage.dev/configs/services/
-
-  - Planification & Guide:
-      - Notion Itinéraire:
+  - 🗺️ Planification:
+      - Notion — Itinéraire:
           href: https://notion.so/
-          description: "Notre itinéraire détaillé jour par jour"
+          description: "Itinéraire détaillé jour par jour"
           icon: notion
       - Google Maps:
           href: https://maps.google.com/
           description: "Cartes et lieux sauvegardés"
           icon: google-maps
+      - Rome2Rio:
+          href: https://www.rome2rio.com/
+          description: "Comparer tous les moyens de transport"
+          abbr: R2R
+      - XE — Devises:
+          href: https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=THB
+          description: "Convertisseur EUR / THB en temps réel"
+          abbr: XE
 
-  - Découverte:
-      - Lonely Planet Thaïlande:
-          href: https://www.lonelyplanet.com/thailand
-          description: "Guides et recommandations"
-      - TripAdvisor:
-          href: https://www.tripadvisor.fr/Tourism-g293915-Thailand-Vacations.html
-          description: "Activités, restaurants et avis"
+  - ✈️ Transport:
+      - Skyscanner:
+          href: https://www.skyscanner.fr/
+          description: "Recherche de vols"
+          icon: https://www.skyscanner.fr/favicon.ico
+      - 12Go Asia:
+          href: https://12go.asia/
+          description: "Bus, trains et ferries en Asie"
+          abbr: 12G
+      - Grab:
+          href: https://www.grab.com/
+          description: "Taxi et livraison en Asie du Sud-Est"
+          abbr: GR
+
+  - 🏨 Hébergement:
+      - Booking.com:
+          href: https://www.booking.com/
+          description: "Hôtels et guesthouses"
+          abbr: BK
+      - Agoda:
+          href: https://www.agoda.com/
+          description: "Spécialiste hébergement Asie"
+          abbr: AG
+      - Airbnb:
+          href: https://www.airbnb.fr/
+          description: "Locations chez l'habitant"
+          icon: https://www.airbnb.fr/favicon.ico
+      - Hostelworld:
+          href: https://www.hostelworld.com/
+          description: "Auberges de jeunesse"
+          abbr: HW
+
+  - 🆘 Urgences & Sécurité:
+      - Ambassade de France — Bangkok:
+          href: https://th.ambafrance.org/
+          description: "Ambassade française en Thaïlande"
+          abbr: 🇫🇷
+      - Fil d'Ariane — Informations urgentes:
+          href: https://fildariane.diplomatie.gouv.fr/fildariane-internet/accueil
+          description: "Alertes de sécurité en cas d'urgences"
+          abbr: AS
+      - Numéros d'urgence Thaïlande:
+          href: https://www.tourismthailand.org/Articles/emergency-numbers-in-thailand
+          description: "Police 191 · SAMU 1669 · Tourisme 1672"
+          abbr: 🚨
 
 
 settings: |
   ---
-  # For configuration options and examples:
-  # https://gethomepage.dev/configs/settings/
-
-  title: 🇹🇭 Compagnon de Voyage - Thaïlande
+  title: Compagnon de Voyage — Thaïlande
   theme: dark
-  color: slate
+  color: teal
 
   providers:
     openweathermap: openweathermapapikey
@@ -165,12 +267,22 @@ settings: |
 
 widgets: |
   ---
-  # For configuration options and examples:
-  # https://gethomepage.dev/configs/info-widgets/
+  - greeting:
+      text_size: 2xl
+      text: "Mon compagnon de Voyage — Thaïlande"
+
+  - greeting:
+      text_size: sm
+      text: "🕐 Bangkok (UTC+7)"
 
   - datetime:
-      text: Heure locale (Bangkok)
-      timezone: Asia/Bangkok
+      text_size: l
+      locale: fr-FR
+      format:
+        dateStyle: full
+        timeStyle: short
+        hourCycle: h23
+        timeZone: Asia/Bangkok
 
   - openmeteo:
       label: Bangkok
@@ -185,7 +297,7 @@ widgets: |
       longitude: 98.9853
       timezone: Asia/Bangkok
       units: metric
-      
+
   - openmeteo:
       label: Phuket
       latitude: 7.8804
@@ -193,7 +305,21 @@ widgets: |
       timezone: Asia/Bangkok
       units: metric
 
+  - openmeteo:
+      label: Koh Samui
+      latitude: 9.5120
+      longitude: 100.0136
+      timezone: Asia/Bangkok
+      units: metric
+
+  - openmeteo:
+      label: Krabi
+      latitude: 8.0863
+      longitude: 98.9063
+      timezone: Asia/Bangkok
+      units: metric
+
   - search:
-      provider: google
+      provider: duckduckgo
       showSearchSuggestions: true
       target: _blank

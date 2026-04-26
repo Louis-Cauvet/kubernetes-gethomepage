@@ -5,12 +5,9 @@ metadata:
 data:
   settings.yaml: |
     ---
-    # For configuration options and examples:
-    # https://gethomepage.dev/configs/settings/
-
-    title: 🇹🇭 Compagnon de Voyage - Thaïlande
+    title: Compagnon de Voyage — Thaïlande
     theme: dark
-    color: slate
+    color: teal
 
     providers:
       openweathermap: openweathermapapikey

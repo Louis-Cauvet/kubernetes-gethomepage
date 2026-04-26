@@ -5,12 +5,22 @@ metadata:
 data:
   widgets.yaml: |
     ---
-    # For configuration options and examples:
-    # https://gethomepage.dev/configs/info-widgets/
+    - greeting:
+        text_size: 2xl
+        text: "Mon compagnon de Voyage — Thaïlande"
+
+    - greeting:
+        text_size: sm
+        text: "🕐 Bangkok (UTC+7)"
 
     - datetime:
-        text: Heure locale (Bangkok)
-        timezone: Asia/Bangkok
+        text_size: l
+        locale: fr-FR
+        format:
+            dateStyle: full
+            timeStyle: short
+            hourCycle: h23
+            timeZone: Asia/Bangkok
 
     - openmeteo:
         label: Bangkok
@@ -25,7 +35,7 @@ data:
         longitude: 98.9853
         timezone: Asia/Bangkok
         units: metric
-        
+
     - openmeteo:
         label: Phuket
         latitude: 7.8804
@@ -33,7 +43,21 @@ data:
         timezone: Asia/Bangkok
         units: metric
 
+    - openmeteo:
+        label: Koh Samui
+        latitude: 9.5120
+        longitude: 100.0136
+        timezone: Asia/Bangkok
+        units: metric
+
+    - openmeteo:
+        label: Krabi
+        latitude: 8.0863
+        longitude: 98.9063
+        timezone: Asia/Bangkok
+        units: metric
+
     - search:
-        provider: google
+        provider: duckduckgo
         showSearchSuggestions: true
         target: _blank

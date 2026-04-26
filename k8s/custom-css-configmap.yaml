@@ -20,3 +20,48 @@ data:
       background-attachment: fixed;
       background-color: #020617;
     }
+
+    /* Titre sur sa propre ligne, météo en dessous */
+    #information-widgets {
+      flex-wrap: wrap !important;
+      row-gap: 0.5rem;
+    }
+
+    #information-widgets > *:first-child {
+      flex-basis: 100% !important;
+      flex-direction: column;
+    }
+
+    #widgets-wrap > * {
+      text-align: start;
+      align-self: flex-start;
+    }
+
+    #widgets-wrap .widget-container:last-child {
+      translate: 0 25px;
+    }
+
+    #information-widgets-right {
+      margin: 0;
+      width: 100%;
+    }
+
+    #information-widgets-right form {
+      width: 100%;
+      max-width : 200px; 
+      margin-left: auto;
+    }
+
+    .information-widget-datetime {
+      margin-right: 20px;
+    }
+
+    .service-card, .bookmark-card {
+      border: 1px solid rgba(251, 191, 36, 0.20) !important;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .service-card:hover, .bookmark-card:hover {
+      border-color: rgba(251, 191, 36, 0.55) !important;
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.08);
+    }

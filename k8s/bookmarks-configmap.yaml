@@ -5,24 +5,41 @@ metadata:
 data:
   bookmarks.yaml: |
     ---
-    # For configuration options and examples:
-    # https://gethomepage.dev/configs/bookmarks
+    - 🔍 Exploration:
+        - Lonely Planet Thaïlande:
+            - abbr: LP
+              href: https://www.lonelyplanet.com/thailand
+        - TripAdvisor Thaïlande:
+            - abbr: TA
+              href: https://www.tripadvisor.fr/Tourism-g293915-Thailand-Vacations.html
+        - GetYourGuide:
+            - abbr: GYG
+              href: https://www.getyourguide.fr/
+        - Viator:
+            - abbr: VI
+              href: https://www.viator.com/
 
-    - Transports & Réservations:
-      - 12Go Asia:
-          - abbr: 12G
-            href: https://12go.asia/
-      - Agoda:
-          - abbr: AG
-            href: https://www.agoda.com/
-      - Booking:
-          - abbr: BK
-            href: https://www.booking.com/
+    - 💱 Finance & Pratique:
+        - Convertisseur EUR/THB:
+            - abbr: XE
+              href: https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=THB
+        - Wise — Transfert:
+            - abbr: WI
+              href: https://wise.com/
+        - Google Translate:
+            - abbr: GT
+              href: https://translate.google.com/?sl=auto&tl=th&op=translate
+        - Infos Visa Thaïlande:
+            - abbr: VISA
+              href: https://www.thaiembassy.com/thailand-visa/
 
-    - Utilitaires:
-      - Convertisseur EUR/THB:
-          - abbr: THB
-            href: https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=THB
-      - Google Translate:
-          - abbr: GT
-            href: https://translate.google.com/?sl=auto&tl=th&op=translate
+    - 🌐 Connectivité:
+        - WhatsApp Web:
+            - abbr: WA
+              href: https://web.whatsapp.com/
+        - Google Drive:
+            - abbr: GD
+              href: https://drive.google.com/
+        - Météo Thaïlande:
+            - abbr: MÉT
+              href: https://www.meteoblue.com/fr/meteo/prevision/semaine/tha%c3%aflande

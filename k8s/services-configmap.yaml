@@ -5,23 +5,66 @@ metadata:
 data:
   services.yaml: |
     ---
-    # For configuration options and examples:
-    # https://gethomepage.dev/configs/services/
+    - 🗺️ Planification:
+        - Notion — Itinéraire:
+            href: https://notion.so/
+            description: "Itinéraire détaillé jour par jour"
+            icon: notion
+        - Google Maps:
+            href: https://maps.google.com/
+            description: "Cartes et lieux sauvegardés"
+            icon: google-maps
+        - Rome2Rio:
+            href: https://www.rome2rio.com/
+            description: "Comparer tous les moyens de transport"
+            abbr: R2R
+        - XE — Devises:
+            href: https://www.xe.com/currencyconverter/convert/?Amount=1&From=EUR&To=THB
+            description: "Convertisseur EUR / THB en temps réel"
+            abbr: XE
 
-    - Planification & Guide:
-      - Notion Itinéraire:
-          href: https://notion.so/
-          description: "Notre itinéraire détaillé jour par jour"
-          icon: notion
-      - Google Maps:
-          href: https://maps.google.com/
-          description: "Cartes et lieux sauvegardés"
-          icon: google-maps
+    - ✈️ Transport:
+        - Skyscanner:
+            href: https://www.skyscanner.fr/
+            description: "Recherche de vols"
+            icon: https://www.skyscanner.fr/favicon.ico
+        - 12Go Asia:
+            href: https://12go.asia/
+            description: "Bus, trains et ferries en Asie"
+            abbr: 12G
+        - Grab:
+            href: https://www.grab.com/
+            description: "Taxi et livraison en Asie du Sud-Est"
+            abbr: GR
 
-    - Découverte:
-      - Lonely Planet Thaïlande:
-          href: https://www.lonelyplanet.com/thailand
-          description: "Guides et recommandations"
-      - TripAdvisor:
-          href: https://www.tripadvisor.fr/Tourism-g293915-Thailand-Vacations.html
-          description: "Activités, restaurants et avis"
+    - 🏨 Hébergement:
+        - Booking.com:
+            href: https://www.booking.com/
+            description: "Hôtels et guesthouses"
+            abbr: BK
+        - Agoda:
+            href: https://www.agoda.com/
+            description: "Spécialiste hébergement Asie"
+            abbr: AG
+        - Airbnb:
+            href: https://www.airbnb.fr/
+            description: "Locations chez l'habitant"
+            icon: https://www.airbnb.fr/favicon.ico
+        - Hostelworld:
+            href: https://www.hostelworld.com/
+            description: "Auberges de jeunesse"
+            abbr: HW
+
+    - 🆘 Urgences & Sécurité:
+        - Ambassade de France — Bangkok:
+            href: https://th.ambafrance.org/
+            description: "Ambassade française en Thaïlande"
+            abbr: 🇫🇷
+        - Fil d'Ariane — Informations urgentes:
+            href: https://fildariane.diplomatie.gouv.fr/fildariane-internet/accueil
+            description: "Alertes de sécurité en cas d'urgences"
+            abbr: AS
+        - Numéros d'urgence Thaïlande:
+            href: https://www.tourismthailand.org/Articles/emergency-numbers-in-thailand
+            description: "Police 191 · SAMU 1669 · Tourisme 1672"
+            abbr: 🚨
