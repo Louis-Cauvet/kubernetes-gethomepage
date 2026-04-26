@@ -2,8 +2,8 @@ replicaCount: 1
 
 autoscaling:
   enabled: true
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: 2
+  maxReplicas: 4
   targetCPUUtilizationPercentage: 70
   behavior:
     scaleUp:
@@ -22,7 +22,7 @@ autoscaling:
 image:
   repository: ghcr.io/gethomepage/homepage
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent  
 
 service:
   type: NodePort
@@ -42,6 +42,14 @@ resources:
   limits:
     cpu: 300m
     memory: 256Mi
+
+probes:
+  liveness:
+    initialDelaySeconds: 5
+    periodSeconds: 15
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
 
 bookmarks: |
   ---
