@@ -14,6 +14,18 @@ kube-prometheus-stack:
       limits:
         cpu: 300m
         memory: 512Mi
+    sidecar:
+      datasources:
+        # Ignore le ConfigMap auto-provisionné par loki-stack
+        # (qui hardcode isDefault: true et entre en conflit avec Prometheus)
+        label: grafana_datasource_kps
+        labelValue: "1"
+    additionalDataSources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://monitoring-loki:3100
+        isDefault: false
 
   prometheus:
     prometheusSpec:
@@ -43,4 +55,42 @@ kube-prometheus-stack:
 
   # Docker Desktop ne supporte pas le montage shared/slave de /
   nodeExporter:
+    enabled: false
+
+loki-stack:
+
+  loki:
+    enabled: true
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  promtail:
+    enabled: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+  # Grafana est déjà fourni par kube-prometheus-stack
+  grafana:
+    enabled: false
+
+  # Désactivés — non nécessaires pour le scope du projet
+  prometheus:
+    enabled: false
+  filebeat:
+    enabled: false
+  fluent-bit:
+    enabled: false
+  logstash:
     enabled: false

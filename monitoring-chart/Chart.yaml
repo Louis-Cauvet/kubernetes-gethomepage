@@ -1,10 +1,14 @@
 apiVersion: v2
 name: monitoring-chart
-description: Observability stack — Prometheus, Grafana, AlertManager
+description: Observability stack — Prometheus, Grafana, AlertManager, Loki
 type: application
-version: 0.1.0
+version: 0.2.0
 
 dependencies:
   - name: kube-prometheus-stack
     version: ">=60.0.0-0"
     repository: https://prometheus-community.github.io/helm-charts
+
+  - name: loki-stack
+    version: ">=2.10.0-0"
+    repository: https://grafana.github.io/helm-charts
