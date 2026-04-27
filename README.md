@@ -123,7 +123,7 @@ qui supprime la release Helm et les ressources Kubernetes associées.
 
 ## 2. Auto-scaling horizontal (HPA)
 
-Le projet inclut un `HorizontalPodAutoscaler` qui ajuste automatiquement le nombre de pods en fonction de la charge CPU. Le nombre de replicas varie entre **1** (minimum) et **3** (maximum), avec un seuil de déclenchement à **70% d'utilisation CPU**.
+Le projet inclut un `HorizontalPodAutoscaler` qui ajuste automatiquement le nombre de pods en fonction de la charge CPU. Le nombre de replicas varie entre **2** (minimum) et **4** (maximum), avec un seuil de déclenchement à **70% d'utilisation CPU**.
 
 ### Prérequis : Metrics Server
 
@@ -182,18 +182,18 @@ Les paramètres du HPA sont centralisés dans `homepage-chart/values.yaml` :
 ```yaml
 autoscaling:
   enabled: true
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: 2
+  maxReplicas: 4
   targetCPUUtilizationPercentage: 70
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 0      # scale up immédiat
+      stabilizationWindowSeconds: 0
       policies:
         - type: Percent
           value: 100
           periodSeconds: 60
     scaleDown:
-      stabilizationWindowSeconds: 300    # attendre 5 min avant de réduire
+      stabilizationWindowSeconds: 300
       policies:
         - type: Percent
           value: 50
@@ -216,6 +216,53 @@ En pratique, le passage de `k8s/` à Helm apporte surtout trois bénéfices :
 
 En résumé, la méthode `homepage-chart/` est préférable pour un déploiement plus industrialisé et plus simple à administrer dans le temps.
 
-## 4. Schéma de l'infrastructure Kubernetes : 
+## 4. Sauvegarde avec Velero et MinIO
+
+Velero assure la sauvegarde automatique des ressources Kubernetes. MinIO sert de stockage S3 compatible pour conserver les sauvegardes. Une `Schedule` Velero déclenche un backup chaque nuit à 2h avec une rétention de 30 jours.
+
+### Installation (avec la méthode Helm)
+
+Exécutez les commandes suivantes pour ajouter les repo Helm nécéssaires et installer MinIO :
+
+```bash
+helm repo add minio https://charts.min.io/
+helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+helm repo update
+helm install minio minio/minio --namespace minio --create-namespace -f minio-values.yaml
+```
+
+Créez ensuite le namespace Velero ainsi que les crédentials permettant d'y accéder :
+
+```bash
+kubectl create namespace velero
+kubectl create secret generic velero-credentials -n velero --from-literal=cloud="[default]
+aws_access_key_id=admin
+aws_secret_access_key=admin1234"
+```
+
+On peut ensuite installer Velero avec Helm : 
+
+```bash
+helm install velero vmware-tanzu/velero --namespace velero -f velero-values.yaml
+```
+
+puis vérifier que le pod tourne bien avec : 
+
+```bash
+kubectl get pods -n velero
+```
+
+### Configuration
+
+Les paramètres Velero sont dans `velero-values.yaml`, les paramètres MinIO dans `minio-values.yaml`. La Schedule est configurée dans `homepage-chart/values.yaml` :
+
+```yaml
+velero:
+  enabled: true
+  schedule: "0 2 * * *"   # chaque nuit à 2h
+  ttl: 720h                # rétention 30 jours
+```
+
+## 5. Schéma de l'infrastructure Kubernetes : 
 
 ![alt text](images/kubernetes-schema.png)

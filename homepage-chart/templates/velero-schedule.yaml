@@ -1,0 +1,23 @@
+{{- if .Values.velero.enabled }}
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: {{ .Release.Name }}-daily-backup
+  namespace: velero
+spec:
+  schedule: {{ .Values.velero.schedule | quote }}
+  template:
+    includedNamespaces:
+      - default
+    includedResources:
+      - deployments
+      - services
+      - configmaps
+      - serviceaccounts
+      - clusterroles
+      - clusterrolebindings
+      - horizontalpodautoscalers
+      - poddisruptionbudgets
+    ttl: {{ .Values.velero.ttl }}
+    storageLocation: default
+{{- end }}

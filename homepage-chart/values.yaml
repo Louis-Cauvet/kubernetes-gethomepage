@@ -1,3 +1,8 @@
+velero:
+  enabled: true
+  schedule: "0 2 * * *"
+  ttl: 720h
+
 replicaCount: 1
 
 autoscaling:

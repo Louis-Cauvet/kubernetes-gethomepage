@@ -1,0 +1,21 @@
+rootUser: admin
+rootPassword: admin1234
+
+mode: standalone
+
+persistence:
+  size: 5Gi
+
+resources:
+  requests:
+    memory: 512Mi
+  limits:
+    memory: 1Gi
+
+service:
+  type: NodePort
+
+buckets:
+  - name: velero-backup
+    policy: none
+    purge: false

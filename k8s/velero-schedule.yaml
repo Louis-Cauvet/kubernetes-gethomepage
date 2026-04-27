@@ -1,0 +1,21 @@
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: homepage-daily-backup
+  namespace: velero
+spec:
+  schedule: "0 2 * * *"
+  template:
+    includedNamespaces:
+      - default
+    includedResources:
+      - deployments
+      - services
+      - configmaps
+      - serviceaccounts
+      - clusterroles
+      - clusterrolebindings
+      - horizontalpodautoscalers
+      - poddisruptionbudgets
+    ttl: 720h
+    storageLocation: default
