@@ -92,13 +92,11 @@ Rôle de ces commandes :
 et pour la méthode avec Helm, vous pouvez également exécuter : 
 
 ```bash
-helm get values homepage
 helm history homepage
 ```
 
 Rôle de ces commandes :
 
-- `helm get values homepage` affiche les valeurs utilisées par la release, ce qui permet de vérifier la configuration réellement appliquée
 - `helm history homepage` liste les différentes révisions de la release, utile pour suivre les mises à jour et préparer un éventuel retour arrière
 
 ### Suppression du déploiement
@@ -156,8 +154,7 @@ kubectl top nodes
 
 **Avec Helm** : 
 
-Le HPA est activé par défaut dans `homepage-chart/values.yaml` :
-
+Le HPA est activé par défaut dans `homepage-chart/values.yaml`, et donc s'installe lors de l'exécution de la commande : 
 ```bash
 helm install homepage ./homepage-chart
 ```
@@ -205,16 +202,16 @@ autoscaling:
 
 La fenêtre de stabilisation de 300 secondes en scale down évite les oscillations incessantes : le HPA attend 5 minutes avant de supprimer des pods.
 
-## 3. Monitoring et observabilité
+## 3. Mise en place des solutions de monitoring et d'observabilité
 
 Le projet inclut un chart Helm dédié à l'observabilité, qui déploie une stack complète dans son propre namespace `monitoring`. Cette stack couvre les deux piliers utiles pour ce projet : **les métriques** (Prometheus + Grafana) et **les logs** (Loki + Promtail).
 
 ### Composants déployés
 
-Le chart `monitoring-chart/` agrège trois dépendances Helm :
+Le chart `monitoring-chart/` regroupe trois dépendances Helm :
 
 - **`kube-prometheus-stack`** — Prometheus, Grafana, AlertManager, kube-state-metrics et node-exporter, le tout préconfiguré avec des dashboards Kubernetes natifs
-- **`loki`** — agrégation et stockage des logs en mode SingleBinary (suffisant pour un cluster mono-nœud)
+- **`loki`** — agrégation et stockage des logs
 - **`promtail`** — DaemonSet qui scrape les logs de tous les pods et les pousse vers Loki
 
 Grafana est exposé en `NodePort` sur le port `30080`, et Loki est ajouté automatiquement comme datasource au démarrage de Grafana.
@@ -229,8 +226,8 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
-# 2. Télécharger les sous-charts
-helm dependency update ./monitoring-chart
+# 2. Télécharger les sous-charts (versions épinglées dans Chart.lock)
+helm dependency build ./monitoring-chart
 
 # 3. Installer la stack dans le namespace monitoring
 helm install monitoring ./monitoring-chart --namespace monitoring --create-namespace
@@ -244,7 +241,7 @@ Le namespace dédié permet d'isoler la stack d'observabilité du cycle de vie d
 http://localhost:30080
 ```
 
-Identifiants par défaut : `admin` / `admin` (configurable dans `monitoring-chart/values.yaml`).
+Identifiants par défaut : `admin` / `admin` (configurables dans `monitoring-chart/values.yaml`).
 
 Vérifier que les composants tournent :
 
@@ -268,9 +265,49 @@ Dans Grafana, aller dans **Explore** → datasource **Loki**, puis lancer la req
 helm uninstall monitoring -n monitoring
 ```
 
-## 4. Sauvegarde avec Velero et MinIo
+## 4. Sauvegarde avec Velero et MinIO
 
+Le chart `backup-chart/` déploie Velero et MinIO dans un namespace dédié `velero`. Velero utilise **Kopia** comme moteur de sauvegarde et MinIO comme stockage S3-compatible. Une `Schedule` déclenche automatiquement un backup du namespace `default` chaque nuit à 2h, avec une rétention de 30 jours.
 
+### Installation
+
+Depuis la racine du projet :
+
+```bash
+# 1. Ajouter les dépôts Helm nécessaires
+helm repo add minio https://charts.min.io/
+helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+helm repo update
+
+# 2. Télécharger les sous-charts (versions épinglées dans Chart.lock)
+helm dependency build ./backup-chart
+
+# 3. Installer la stack dans le namespace velero
+helm install backup ./backup-chart --namespace velero --create-namespace
+```
+
+### Vérification
+
+```bash
+kubectl get pods -n velero
+kubectl get backupstoragelocation -n velero   # doit afficher "Available"
+kubectl get schedules -n velero               # doit afficher "homepage-daily"
+```
+
+### Accès à la console MinIO
+
+```text
+http://localhost:30090
+```
+
+Identifiants : `admin` / `admin1234`. Les sauvegardes sont visibles dans **Object Browser**
+
+### Suppression
+
+```bash
+helm uninstall backup -n velero
+kubectl delete namespace velero
+```
 
 ## 5. Analyse comparative : `k8s/` vs Helm
 

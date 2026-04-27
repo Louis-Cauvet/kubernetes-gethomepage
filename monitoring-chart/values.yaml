@@ -1,6 +1,8 @@
 kube-prometheus-stack:
 
   grafana:
+    image:
+      pullPolicy: IfNotPresent
     adminPassword: admin
     service:
       type: NodePort
@@ -23,6 +25,7 @@ kube-prometheus-stack:
 
   prometheus:
     prometheusSpec:
+      imagePullPolicy: IfNotPresent
       retention: 10d
       resources:
         requests:
@@ -35,6 +38,7 @@ kube-prometheus-stack:
 
   alertmanager:
     alertmanagerSpec:
+      imagePullPolicy: IfNotPresent
       resources:
         requests:
           cpu: 50m
@@ -51,6 +55,8 @@ kube-prometheus-stack:
     enabled: true
 
   prometheus-node-exporter:
+    image:
+      pullPolicy: IfNotPresent
     hostRootFsMount:
       enabled: false
 
@@ -64,6 +70,8 @@ kube-prometheus-stack:
     enabled: false
 
 loki:
+  image:
+    pullPolicy: IfNotPresent
   fullnameOverride: loki
   deploymentMode: SingleBinary
 
@@ -127,6 +135,8 @@ loki:
       enabled: false
 
 promtail:
+  image:
+    pullPolicy: IfNotPresent
   fullnameOverride: promtail
 
   config:

@@ -1,0 +1,91 @@
+minio:
+  fullnameOverride: minio
+  mode: standalone
+  rootUser: admin
+  rootPassword: admin1234
+
+  buckets:
+    - name: velero-backups
+      policy: none
+      purge: false
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  consoleService:
+    type: NodePort
+    nodePort: 30090
+
+
+velero:
+  fullnameOverride: velero
+
+  snapshotsEnabled: false
+
+  configuration:
+    uploaderType: kopia
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: velero-backups
+        default: true
+        config:
+          region: minio
+          s3ForcePathStyle: "true"
+          s3Url: http://minio:9000
+
+  credentials:
+    useSecret: true
+    secretContents:
+      cloud: |
+        [default]
+        aws_access_key_id = admin
+        aws_secret_access_key = admin1234
+
+  # Plugin AWS requis pour le backend S3/MinIO
+  initContainers:
+    - name: velero-plugin-for-aws
+      image: velero/velero-plugin-for-aws:v1.10.0
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+
+  # node-agent : DaemonSet requis pour les sauvegardes de volumes avec Kopia
+  deployNodeAgent: true
+  nodeAgent:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  # Schedule : backup du namespace default chaque nuit à 2h, rétention 30 jours
+  schedules:
+    homepage-daily:
+      disabled: false
+      schedule: "0 2 * * *"
+      template:
+        ttl: 720h0m0s
+        includedNamespaces:
+          - default
+        storageLocation: default

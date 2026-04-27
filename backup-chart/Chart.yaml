@@ -1,0 +1,14 @@
+apiVersion: v2
+name: backup-chart
+description: Backup stack — Velero (Kopia) + MinIO
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: minio
+    version: ">=5.0.0-0"
+    repository: https://charts.min.io/
+
+  - name: velero
+    version: ">=7.0.0-0"
+    repository: https://vmware-tanzu.github.io/helm-charts
