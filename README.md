@@ -4,7 +4,6 @@ Ce projet permet de déployer [`gethomepage.dev`](https://gethomepage.dev/) sur 
 
 - `k8s/` : manifests Kubernetes classiques, méthode par défaut
 - `homepage-chart/` : chart Helm, méthode optimisée
-- `monitoring-chart/` : chart Helm dédié à l'observabilité (Prometheus, Grafana, Loki, Promtail)
 
 ## Prérequis
 
@@ -122,9 +121,9 @@ helm uninstall homepage
 qui supprime la release Helm et les ressources Kubernetes associées.
 
 
-## 2. Auto-scaling horizontal (HPA)
+## 2. Mise en place de l'auto-scaling horizontal (HPA)
 
-Le projet inclut un `HorizontalPodAutoscaler` qui ajuste automatiquement le nombre de pods en fonction de la charge CPU. Le nombre de replicas varie entre **1** (minimum) et **3** (maximum), avec un seuil de déclenchement à **70% d'utilisation CPU**.
+Le projet inclut un `HorizontalPodAutoscaler` qui ajuste automatiquement le nombre de pods en fonction de la charge CPU. Le nombre de replicas varie entre **2** (minimum) et **4** (maximum), avec un seuil de déclenchement à **70% d'utilisation CPU**.
 
 ### Prérequis : Metrics Server
 
@@ -155,7 +154,9 @@ kubectl top nodes
 
 ### Déploiement du HPA
 
-**Avec Helm** (recommandé) — le HPA est activé par défaut dans `homepage-chart/values.yaml` :
+**Avec Helm** : 
+
+Le HPA est activé par défaut dans `homepage-chart/values.yaml` :
 
 ```bash
 helm install homepage ./homepage-chart
@@ -183,27 +184,27 @@ Les paramètres du HPA sont centralisés dans `homepage-chart/values.yaml` :
 ```yaml
 autoscaling:
   enabled: true
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: 2
+  maxReplicas: 4
   targetCPUUtilizationPercentage: 70
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 0      # scale up immédiat
+      stabilizationWindowSeconds: 0
       policies:
         - type: Percent
           value: 100
           periodSeconds: 60
     scaleDown:
-      stabilizationWindowSeconds: 300    # attendre 5 min avant de réduire
+      stabilizationWindowSeconds: 300
       policies:
         - type: Percent
           value: 50
           periodSeconds: 60
 ```
 
-La fenêtre de stabilisation de 300 secondes en scale down évite les oscillations : le HPA attend 5 minutes de charge faible avant de supprimer des pods.
+La fenêtre de stabilisation de 300 secondes en scale down évite les oscillations incessantes : le HPA attend 5 minutes avant de supprimer des pods.
 
-## 3. Monitoring et observabilité (`monitoring-chart/`)
+## 3. Monitoring et observabilité
 
 Le projet inclut un chart Helm dédié à l'observabilité, qui déploie une stack complète dans son propre namespace `monitoring`. Cette stack couvre les deux piliers utiles pour ce projet : **les métriques** (Prometheus + Grafana) et **les logs** (Loki + Promtail).
 
@@ -260,34 +261,17 @@ Dans Grafana, aller dans **Explore** → datasource **Loki**, puis lancer la req
 {namespace="default", pod=~"my-homepage.*"}
 ```
 
-### Logs verbeux côté Homepage
-
-L'image `gethomepage` n'écrit par défaut que quelques lignes au démarrage. Pour générer des logs exploitables dans Loki, le chart expose une variable `logLevel` :
-
-```yaml
-# homepage-chart/values.yaml
-logLevel: debug
-```
-
-Cette variable est injectée dans le pod via la variable d'environnement `LOG_LEVEL`, et permet à Homepage de logger toutes les requêtes HTTP et les appels aux providers externes (météo, etc.).
-
-### Particularités Docker Desktop
-
-Docker Desktop fait coexister deux runtimes : `containerd` pour les pods système (CoreDNS, etcd, kube-apiserver…) et `Docker Engine` pour les pods utilisateur. Cela impose deux ajustements dans `monitoring-chart/values.yaml` :
-
-- **`nodeExporter.enabled: false`** — node-exporter monte `/` en mode shared/slave, non supporté sur Docker Desktop. À réactiver sur un vrai cluster (kubeadm, EKS, GKE…)
-- **`promtail.config.snippets.pipelineStages: - docker: {}`** — le parser `cri` par défaut ne sait pas lire le format JSON Docker des pods utilisateur (`{"log":"…","stream":"…","time":"…"}`), ce qui fait rejeter les entrées par Loki avec `ingester_error`. Le parser `docker` règle le problème.
-
-Sur un cluster en pure containerd (cas standard en production), il suffit de retirer ces deux contournements.
-
 ### Suppression
 
 ```bash
 helm uninstall monitoring -n monitoring
-kubectl delete namespace monitoring
 ```
 
-## 4. Analyse comparative : `k8s/` vs Helm
+## 4. Sauvegarde avec Velero et Garage
+
+
+
+## 5. Analyse comparative : `k8s/` vs Helm
 
 Pour avoir mis en place les 2 méthodes, on constate que l'approche `k8s/` est pratique pour comprendre Kubernetes et chacun de ces manifests de configuration, mais qu'elle devient vite lourde à maintenir dès qu'il faut faire évoluer cette configuration ou rejouer proprement des mises à jour.
 
@@ -301,6 +285,6 @@ En pratique, le passage de `k8s/` à Helm apporte surtout trois bénéfices :
 
 En résumé, la méthode `homepage-chart/` est préférable pour un déploiement plus industrialisé et plus simple à administrer dans le temps.
 
-## 5. Schéma de l'infrastructure Kubernetes : 
+## 6. Schéma de l'infrastructure Kubernetes : 
 
 ![alt text](images/kubernetes-schema.png)
