@@ -187,6 +187,7 @@ autoscaling:
   minReplicas: 2
   maxReplicas: 4
   targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
   behavior:
     scaleUp:
       stabilizationWindowSeconds: 0
@@ -267,7 +268,7 @@ Dans Grafana, aller dans **Explore** → datasource **Loki**, puis lancer la req
 helm uninstall monitoring -n monitoring
 ```
 
-## 4. Sauvegarde avec Velero et Garage
+## 4. Sauvegarde avec Velero et MinIo
 
 
 
