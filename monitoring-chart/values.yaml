@@ -133,6 +133,12 @@ promtail:
     clients:
       - url: http://loki:3100/loki/api/v1/push
 
+    # Docker Desktop : les user pods loggent en JSON Docker, pas en CRI.
+    # Le parser cri par défaut fait rejeter les entries par Loki (ingester_error).
+    snippets:
+      pipelineStages:
+        - docker: {}
+
   resources:
     requests:
       cpu: 50m
