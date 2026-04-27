@@ -14,17 +14,11 @@ kube-prometheus-stack:
       limits:
         cpu: 300m
         memory: 512Mi
-    sidecar:
-      datasources:
-        # Ignore le ConfigMap auto-provisionné par loki-stack
-        # (qui hardcode isDefault: true et entre en conflit avec Prometheus)
-        label: grafana_datasource_kps
-        labelValue: "1"
     additionalDataSources:
       - name: Loki
         type: loki
         access: proxy
-        url: http://monitoring-loki:3100
+        url: http://loki:3100
         isDefault: false
 
   prometheus:
@@ -57,40 +51,80 @@ kube-prometheus-stack:
   nodeExporter:
     enabled: false
 
-loki-stack:
+loki:
+  fullnameOverride: loki
+  deploymentMode: SingleBinary
 
   loki:
-    enabled: true
-    persistence:
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    schemaConfig:
+      configs:
+        - from: "2024-01-01"
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+    storage:
+      type: filesystem
+    pattern_ingester:
       enabled: false
+
+  singleBinary:
+    replicas: 1
+    persistence:
+      # Le chart ne fallback pas sur emptyDir si désactivé,
+      # et readOnlyRootFilesystem empêche /var/loki d'être écrit.
+      # Petit PVC suffit pour le scope du projet.
+      enabled: true
+      size: 1Gi
     resources:
       requests:
         cpu: 100m
         memory: 128Mi
       limits:
-        cpu: 200m
-        memory: 256Mi
+        cpu: 300m
+        memory: 512Mi
 
-  promtail:
-    enabled: true
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
+  # Désactiver les composants non utilisés en mode SingleBinary
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  backend:
+    replicas: 0
+  chunksCache:
+    enabled: false
+  resultsCache:
+    enabled: false
+  gateway:
+    enabled: false
+  test:
+    enabled: false
+  lokiCanary:
+    enabled: false
+  monitoring:
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
+    lokiCanary:
+      enabled: false
 
-  # Grafana est déjà fourni par kube-prometheus-stack
-  grafana:
-    enabled: false
+promtail:
+  fullnameOverride: promtail
 
-  # Désactivés — non nécessaires pour le scope du projet
-  prometheus:
-    enabled: false
-  filebeat:
-    enabled: false
-  fluent-bit:
-    enabled: false
-  logstash:
-    enabled: false
+  config:
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
