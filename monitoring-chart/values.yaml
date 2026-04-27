@@ -47,8 +47,20 @@ kube-prometheus-stack:
   kubeEtcd:
     enabled: false
 
-  # Docker Desktop ne supporte pas le montage shared/slave de /
   nodeExporter:
+    enabled: true
+
+  prometheus-node-exporter:
+    hostRootFsMount:
+      enabled: false
+
+  # Sur Docker Desktop ces 3 composants bindent sur 127.0.0.1 du control-plane
+  # et ne sont pas atteignables depuis les pods → ServiceMonitors désactivés
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
     enabled: false
 
 loki:
