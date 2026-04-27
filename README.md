@@ -4,6 +4,7 @@ Ce projet permet de déployer [`gethomepage.dev`](https://gethomepage.dev/) sur 
 
 - `k8s/` : manifests Kubernetes classiques, méthode par défaut
 - `homepage-chart/` : chart Helm, méthode optimisée
+- `monitoring-chart/` : chart Helm dédié à l'observabilité (Prometheus, Grafana, Loki, Promtail)
 
 ## Prérequis
 
@@ -202,7 +203,91 @@ autoscaling:
 
 La fenêtre de stabilisation de 300 secondes en scale down évite les oscillations : le HPA attend 5 minutes de charge faible avant de supprimer des pods.
 
-## 3. Analyse comparative : `k8s/` vs Helm
+## 3. Monitoring et observabilité (`monitoring-chart/`)
+
+Le projet inclut un chart Helm dédié à l'observabilité, qui déploie une stack complète dans son propre namespace `monitoring`. Cette stack couvre les deux piliers utiles pour ce projet : **les métriques** (Prometheus + Grafana) et **les logs** (Loki + Promtail).
+
+### Composants déployés
+
+Le chart `monitoring-chart/` agrège trois dépendances Helm :
+
+- **`kube-prometheus-stack`** — Prometheus, Grafana, AlertManager, kube-state-metrics et node-exporter, le tout préconfiguré avec des dashboards Kubernetes natifs
+- **`loki`** — agrégation et stockage des logs en mode SingleBinary (suffisant pour un cluster mono-nœud)
+- **`promtail`** — DaemonSet qui scrape les logs de tous les pods et les pousse vers Loki
+
+Grafana est exposé en `NodePort` sur le port `30080`, et Loki est ajouté automatiquement comme datasource au démarrage de Grafana.
+
+### Installation
+
+Depuis la racine du projet :
+
+```bash
+# 1. Ajouter les dépôts Helm nécessaires
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+# 2. Télécharger les sous-charts
+helm dependency update ./monitoring-chart
+
+# 3. Installer la stack dans le namespace monitoring
+helm install monitoring ./monitoring-chart --namespace monitoring --create-namespace
+```
+
+Le namespace dédié permet d'isoler la stack d'observabilité du cycle de vie de l'application : un `helm uninstall homepage` ne touche pas à Grafana, et inversement.
+
+### Accès à Grafana
+
+```text
+http://localhost:30080
+```
+
+Identifiants par défaut : `admin` / `admin` (configurable dans `monitoring-chart/values.yaml`).
+
+Vérifier que les composants tournent :
+
+```bash
+kubectl get pods -n monitoring
+```
+
+Les pods attendus : `prometheus-monitoring-...`, `monitoring-grafana-...`, `alertmanager-...`, `loki-0`, `promtail-...`.
+
+### Vérification de Loki
+
+Dans Grafana, aller dans **Explore** → datasource **Loki**, puis lancer la requête suivante pour voir les logs de Homepage :
+
+```logql
+{namespace="default", pod=~"my-homepage.*"}
+```
+
+### Logs verbeux côté Homepage
+
+L'image `gethomepage` n'écrit par défaut que quelques lignes au démarrage. Pour générer des logs exploitables dans Loki, le chart expose une variable `logLevel` :
+
+```yaml
+# homepage-chart/values.yaml
+logLevel: debug
+```
+
+Cette variable est injectée dans le pod via la variable d'environnement `LOG_LEVEL`, et permet à Homepage de logger toutes les requêtes HTTP et les appels aux providers externes (météo, etc.).
+
+### Particularités Docker Desktop
+
+Docker Desktop fait coexister deux runtimes : `containerd` pour les pods système (CoreDNS, etcd, kube-apiserver…) et `Docker Engine` pour les pods utilisateur. Cela impose deux ajustements dans `monitoring-chart/values.yaml` :
+
+- **`nodeExporter.enabled: false`** — node-exporter monte `/` en mode shared/slave, non supporté sur Docker Desktop. À réactiver sur un vrai cluster (kubeadm, EKS, GKE…)
+- **`promtail.config.snippets.pipelineStages: - docker: {}`** — le parser `cri` par défaut ne sait pas lire le format JSON Docker des pods utilisateur (`{"log":"…","stream":"…","time":"…"}`), ce qui fait rejeter les entrées par Loki avec `ingester_error`. Le parser `docker` règle le problème.
+
+Sur un cluster en pure containerd (cas standard en production), il suffit de retirer ces deux contournements.
+
+### Suppression
+
+```bash
+helm uninstall monitoring -n monitoring
+kubectl delete namespace monitoring
+```
+
+## 4. Analyse comparative : `k8s/` vs Helm
 
 Pour avoir mis en place les 2 méthodes, on constate que l'approche `k8s/` est pratique pour comprendre Kubernetes et chacun de ces manifests de configuration, mais qu'elle devient vite lourde à maintenir dès qu'il faut faire évoluer cette configuration ou rejouer proprement des mises à jour.
 
@@ -216,6 +301,6 @@ En pratique, le passage de `k8s/` à Helm apporte surtout trois bénéfices :
 
 En résumé, la méthode `homepage-chart/` est préférable pour un déploiement plus industrialisé et plus simple à administrer dans le temps.
 
-## 4. Schéma de l'infrastructure Kubernetes : 
+## 5. Schéma de l'infrastructure Kubernetes : 
 
 ![alt text](images/kubernetes-schema.png)
