@@ -79,7 +79,8 @@ velero:
       cpu: 300m
       memory: 256Mi
 
-  # Schedule : backup du namespace default chaque nuit à 2h, rétention 30 jours
+  # Schedule : backup du namespace default 
+  # chaque nuit à 2h, rétention 30 jours
   schedules:
     homepage-daily:
       disabled: false
